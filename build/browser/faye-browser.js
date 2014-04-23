@@ -1096,6 +1096,7 @@ Faye.Client = Faye.Class({
     this.ca         = this._options.ca;
     this._disabled  = [];
     this._retry     = this._options.retry || this.DEFAULT_RETRY;
+    this.bootstrap_protocotols = this._options.bootstrap_protocotols || Faye.MANDATORY_CONNECTION_TYPES;
 
     for (var key in this.endpoints)
       this.endpoints[key] = Faye.URI.parse(this.endpoints[key]);
@@ -1156,8 +1157,7 @@ Faye.Client = Faye.Class({
     var self = this;
 
     this.info('Initiating handshake with ?', Faye.URI.stringify(this.endpoint));
-    this._selectTransport(['websocket'], function() {
-
+    var send_handshake = function() {
       this._send({
         channel:                  Faye.Channel.HANDSHAKE,
         version:                  Faye.BAYEUX_VERSION,
@@ -1168,6 +1168,8 @@ Faye.Client = Faye.Class({
         if (response.successful) {
           this._state     = this.CONNECTED;
           this._clientId  = response.clientId;
+
+          this._selectTransport(response.supportedConnectionTypes);
 
           this.info('Handshake successful: ?', this._clientId);
 
@@ -1180,7 +1182,16 @@ Faye.Client = Faye.Class({
           this._state = this.UNCONNECTED;
         }
       }, this);
-    }.bind(this));
+    }.bind(this);
+
+    if (this._transport) {
+      this._selectTransport(this.bootstrap_protocotols);
+      send_handshake();
+    }
+    else {
+      this._selectTransport(this.bootstrap_protocotols, send_handshake);
+    }
+
   },
 
   // Request                              Response
@@ -1410,7 +1421,7 @@ Faye.Client = Faye.Class({
       if (this._transport) this._transport.close();
 
       this._transport = transport;
-      callback();
+      if (callback) callback();
     }, this);
   },
 
