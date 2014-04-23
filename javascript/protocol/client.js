@@ -100,13 +100,10 @@ Faye.Client = Faye.Class({
           this._state     = this.CONNECTED;
           this._clientId  = response.clientId;
 
-          this._selectTransport(response.supportedConnectionTypes, function() {
+          this.info('Handshake successful: ?', this._clientId);
 
-            this.info('Handshake successful: ?', this._clientId);
-
-            this.subscribe(this._channels.getKeys(), true);
-            if (callback) Faye.Promise.defer(function() { callback.call(context) });
-          }.bind(this));
+          this.subscribe(this._channels.getKeys(), true);
+          if (callback) Faye.Promise.defer(function() { callback.call(context) });
 
         } else {
           this.info('Handshake unsuccessful');
