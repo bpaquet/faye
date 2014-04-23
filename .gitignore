@@ -1,5 +1,4 @@
 *.gem
-build
 Gemfile.lock
 lib/*.js
 lib/*.map
