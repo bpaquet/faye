@@ -87,7 +87,7 @@ Faye.Client = Faye.Class({
     var self = this;
 
     this.info('Initiating handshake with ?', Faye.URI.stringify(this.endpoint));
-    this._selectTransport(Faye.MANDATORY_CONNECTION_TYPES, function() {
+    this._selectTransport(['websocket'], function() {
 
       this._send({
         channel:                  Faye.Channel.HANDSHAKE,
