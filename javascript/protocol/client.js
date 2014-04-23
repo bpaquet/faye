@@ -27,7 +27,7 @@ Faye.Client = Faye.Class({
     this.ca         = this._options.ca;
     this._disabled  = [];
     this._retry     = this._options.retry || this.DEFAULT_RETRY;
-    this.bootstrap_protocotols = this._options.bootstrap_protocotols || Faye.MANDATORY_CONNECTION_TYPES;
+    this.bootstrap_protocols = this._options.bootstrap_protocols || Faye.MANDATORY_CONNECTION_TYPES;
 
     for (var key in this.endpoints)
       this.endpoints[key] = Faye.URI.parse(this.endpoints[key]);
@@ -116,11 +116,11 @@ Faye.Client = Faye.Class({
     }.bind(this);
 
     if (this._transport) {
-      this._selectTransport(this.bootstrap_protocotols);
+      this._selectTransport(this.bootstrap_protocols);
       send_handshake();
     }
     else {
-      this._selectTransport(this.bootstrap_protocotols, send_handshake);
+      this._selectTransport(this.bootstrap_protocols, send_handshake);
     }
 
   },
