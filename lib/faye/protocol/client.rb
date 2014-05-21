@@ -87,30 +87,31 @@ module Faye
       @state = CONNECTING
 
       info('Initiating handshake with ?', @endpoint)
-      select_transport(MANDATORY_CONNECTION_TYPES)
+      select_transport(MANDATORY_CONNECTION_TYPES) do
 
-      send({
-        'channel'                   => Channel::HANDSHAKE,
-        'version'                   => BAYEUX_VERSION,
-        'supportedConnectionTypes'  => [@transport.connection_type]
+        send({
+          'channel'                   => Channel::HANDSHAKE,
+          'version'                   => BAYEUX_VERSION,
+          'supportedConnectionTypes'  => [@transport.connection_type]
 
-      }) do |response|
+        }) do |response|
 
-        if response['successful']
-          @state     = CONNECTED
-          @client_id = response['clientId']
+          if response['successful']
+            @state     = CONNECTED
+            @client_id = response['clientId']
 
-          select_transport(response['supportedConnectionTypes'])
+            select_transport(response['supportedConnectionTypes'])
 
-          info('Handshake successful: ?', @client_id)
+            info('Handshake successful: ?', @client_id)
 
-          subscribe(@channels.keys, true)
-          block.call if block_given?
+            subscribe(@channels.keys, true)
+            block.call if block_given?
 
-        else
-          info('Handshake unsuccessful')
-          EventMachine.add_timer(@advice['interval'] / 1000.0) { handshake(&block) }
-          @state = UNCONNECTED
+          else
+            info('Handshake unsuccessful')
+            EventMachine.add_timer(@advice['interval'] / 1000.0) { handshake(&block) }
+            @state = UNCONNECTED
+          end
         end
       end
     end
@@ -333,6 +334,8 @@ module Faye
         @transport.close if @transport
 
         @transport = transport
+
+        yield if block_given?
       end
     end
 
